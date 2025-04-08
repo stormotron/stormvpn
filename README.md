@@ -82,7 +82,7 @@ Example of server.crt and server.key generation:
 **Client**
 
 The client, on the other hand, supports only the command line. Mandatory parameters for it are:\
--u - URL to connect to the server, e.g. https://storm-vpn.your-domain.com/storm-vpn-endpoint\
+-u - URL to connect to the server, e.g. https://storm-vpn.your-domain.com/storm-vpn-endpoint \
 -p - the name of the peer to connect to;\
 -s - the secret of the peer to connect to;\
 -i - name of the client-side interface.\
