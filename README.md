@@ -1,4 +1,4 @@
-StormVPN version 0.0.3
+StormVPN version 0.0.4
 ======================
 Copyright (c) Netstorm
 
@@ -64,6 +64,7 @@ secret_key=test1key
 interface_name=iface1
 mac_address=auto
 link_type=bridge:bridge1:bridge2
+link_quality=auto
 
 [test2]
 secret_key=test2key
@@ -73,6 +74,15 @@ link_type=none
 ```
 
 Thus, the test1 peer contains the secret key for authorization test1key, the interface name that will be assigned at server startup - iface1, mac_address in this case will be generated automatically (unicast MAC), and link_type= bridge:bridge1:bridge2 means that the program will join the interface on the server to bridge bridge1 and on the client to bridge2 (bridges must be created in advance on both sides). As you can see, mac_address can be set manually and link_type can be none, which means that two Ethernet interfaces will be created and tunneled together.
+In version 0.0.4 a new link_quality key has been added for for each individual peer, which can take the following values - auto, none and <bw>M, where <bw> is the value in megabits/second. This option enables test traffic within the VPN, thereby measuring the connection speed. The connection speed statistics are then sent to the server console and can also be displayed in the stormvpn-stats console utility, which has also been available since version 0.0.4. Test traffic stops moving through the channel as soon as real client traffic appears. This option allows you to monitor the channel quality when there is no activity in the channel.
+
+```
+Peer Name            | Connected At           | Last Activity          | Avg Up (Mbps)   | Avg Down (Mbps)
+--------------------+------------------------+------------------------+-----------------+-----------------
+test1                | 15:48:49 10.04.2025    | 15:49:37 10.04.2025    | 8.93            | 8.90           
+                     | (48s ago)              | (0s ago)               |                 |                
+--------------------+------------------------+------------------------+-----------------+-----------------
+```
 
 Example of server.crt and server.key generation:
 ```
