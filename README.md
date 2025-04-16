@@ -1,4 +1,4 @@
-StormVPN version 0.0.5
+StormVPN version 0.0.6
 ============================
 Copyright (c) Netstorm, 2025
 
@@ -93,6 +93,8 @@ Example of server.crt and server.key generation:
 ```
 # openssl req -x509 -newkey rsa:4096 -keyout server.key -out server.crt -sha256 -days 3650 -nodes -subj "/C=XX/ST=StateName/L=CityName/O=CompanyName/OU=CompanySectionName/CN=CommonNameOrHostname"
 ```
+
+Since version 0.0.6, the server supports SIGHUP signal to reload the part of the configuration.
 
 **Client**
 
