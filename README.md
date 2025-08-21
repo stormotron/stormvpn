@@ -179,12 +179,12 @@ Server environment variables:
 - CLIENT<NUM>    - String, clients description, no defaults - MUST be defined
 
 Client examples:
-CLIENT1='peer=peer01,secret=peer01secret'
-CLIENT2='peer=peer02,secret=peer02secret,interface=peer02,mac=00:11:22:33:44:55'
-CLIENT4='peer=localpeer,secret=localpeersecret,link_quality=5M'
-CLIENT5='peer=brpeer,secret=brpeersecret,link_quality=auto,link_type=bridge:mybridge:clbridge'
-CLIENT6='peer=brpeer2,secret=brpeersecret2,link_type=bridge:mybridge:clbridge,bridge_vlan=10:16'
-CLIENT7='peer=ippeer,secret=ippeersecret,link_type=ip:30:192.168.0.1:192.168.0.2:dynamic:50'
+CLIENT1=peer=peer01,secret=peer01secret,bandwidth=2M
+CLIENT2=peer=peer02,secret=peer02secret,interface=peer02,mac=00:11:22:33:44:55
+CLIENT4=peer=localpeer,secret=localpeersecret,link_quality=5M
+CLIENT5=peer=brpeer,secret=brpeersecret,link_quality=auto,link_type=bridge:mybridge:clbridge
+CLIENT6=peer=brpeer2,secret=brpeersecret2,link_type=bridge:mybridge:clbridge,bridge_vlan=10:16
+CLIENT7=peer=ippeer,secret=ippeersecret,link_type=ip:30:192.168.0.1:192.168.0.2:dynamic:50
 
 - WEB_PORT       - Int, Web interface port, enables WEB interface (configuration via WEB), no default
 - WEB_IP         - IP, Web interface IP, default: 0.0.0.0
