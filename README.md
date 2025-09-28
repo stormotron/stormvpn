@@ -1,4 +1,4 @@
-StormVPN version 0.0.9
+StormVPN version 0.1.0
 ============================
 Copyright (c) Netstorm, 2025
 
@@ -88,8 +88,9 @@ bandwidth=10M
 ```
 
 Thus, the test1 peer contains the secret key for authorization test1key, the interface name that will be assigned at server startup - iface1, mac_address in this case will be generated automatically (unicast MAC), and link_type=bridge:bridge1:bridge2 means that the program will join the interface on the server to bridge bridge1 and on the client to bridge2 (bridges must be created in advance on both sides). As you can see, mac_address can be set manually and link_type can be none, which means that two Ethernet interfaces will be created and tunneled together.
-In version 0.0.4 a new link_quality key has been added for for each individual peer, which can take the following values - auto, none and **bw**(K|M), where **bw** is the value in (kilobits|megabits)/second. This option enables test traffic within the VPN, thereby measuring the connection speed. The connection speed statistics are then sent to the server console and can also be displayed in the stormvpn-stats console utility, which has also been available since version 0.0.4. Test traffic stops moving through the channel as soon as real client traffic appears. This option allows you to monitor the channel quality when there is no activity in the channel.
+In version 0.0.4 a new link_quality key has been added for for each individual peer, which can take the following values - auto, none and **bw**(K|M), where **bw** is the value in (kilobits|megabits)/second. This option enables test traffic within the VPN, thereby measuring the connection speed. The connection speed statistics are then sent to the server console and can also be displayed in the stormvpn-stats console utility, which has also been available since version 0.0.4. Starting with version 0.1.0, this option stops measuring line quality when useful (DATA) traffic appears only in auto mode. When a constant value is specified for link_quality, measurement always occurs.
 Starting with version 0.0.9, a bandwidth parameter was added to peers to limit the peer speed in the form of **bw**(K|M), where **bw** is the speed value in (kilobits/megabits)/second. Also, in version 0.0.9, a kick function was added to the server socket to drop user session, which was also added to stats and the web interface.
+Starting with version 0.1.0, an additional parameter for peers has been introduced – ban_quality, which is set to a value of the form <INT>(K|M). When the link_quality measurement (not in auto mode) falls below ban_quality, the peer's useful (DATA) traffic is blocked. This allows unreliable peers to be excluded from the multi-link scheme. When link_quality returns to normal values, the peer is automatically unblocked.
 
 ```
 Peer Name            | Client IP            | Connected At           | Last Activity          | Bandwidth (Mbps)   | LQ Up (Mbps)    | LQ Down (Mbps)  | Avg Up (Mbps)   | Avg Down (Mbps)
@@ -181,7 +182,7 @@ Server environment variables:
 Client examples:
 CLIENT1=peer=peer01,secret=peer01secret,bandwidth=2M
 CLIENT2=peer=peer02,secret=peer02secret,interface=peer02,mac=00:11:22:33:44:55
-CLIENT4=peer=localpeer,secret=localpeersecret,link_quality=5M
+CLIENT4=peer=localpeer,secret=localpeersecret,link_quality=5M,ban_quality=2M
 CLIENT5=peer=brpeer,secret=brpeersecret,link_quality=auto,link_type=bridge:mybridge:clbridge
 CLIENT6=peer=brpeer2,secret=brpeersecret2,link_type=bridge:mybridge:clbridge,bridge_vlan=10:16
 CLIENT7=peer=ippeer,secret=ippeersecret,link_type=ip:30:192.168.0.1:192.168.0.2:dynamic:50
