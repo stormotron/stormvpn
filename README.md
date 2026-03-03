@@ -1,6 +1,6 @@
-StormVPN version 0.1.0
+StormVPN version 0.1.1
 ============================
-Copyright (c) Netstorm, 2025
+Copyright (c) Netstorm, 2026
 
 > Classic “unnecessary”, but what the hell - why isn't it free???
 
@@ -287,3 +287,8 @@ Without the correct key, the server operates in limited mode and can only accept
 **Contacts**
 
 Telegram: el_stormi
+
+**Updates:**
+
+* 0.1.1
+Starting with version 0.1.1, the server-side protection of the program has been updated, new serial keys are now in effect, and the request code format has changed. The old keys are no longer valid. The signature keys for the Android application have also changed. It is not possible to update the Android client from version 0.1.0 to version 0.1.1 while retaining data. Improvements have been made to the server side, and the Android client has been refined and improved with support for profiles in widgets.
