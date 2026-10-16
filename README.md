@@ -1,10 +1,10 @@
-StormVPN version 0.1.1
+StormVPN version 0.1.2
 ============================
 Copyright (c) Netstorm, 2026
 
 > Classic “unnecessary”, but what the hell - why isn't it free???
 
-StormVPN is an implementation of Ethernet tunneling protocol over HTTP/HTTPS to provide full Ethernet connectivity. The package includes both StormVPN client and server, is distributed as binary files only and has license restrictions. Both server and client run as root only.
+StormVPN is an implementation of Ethernet tunneling protocol over HTTP/HTTPS or ICMP to provide full Ethernet connectivity. The package includes both StormVPN client and server, is distributed as binary files only and has license restrictions. Both server and client run as root only.
 
 **Server**
 
@@ -39,7 +39,6 @@ server {
         listen                  0.0.0.0:443 ssl;
         server_name             storm-vpn.your-domain.com;
 
-        # ssl                     on;
         ssl_certificate         /etc/letsencrypt/live/your-domain.com/fullchain.pem;
         ssl_certificate_key     /etc/letsencrypt/live/your-domain.com/privkey.pem;
 
@@ -77,6 +76,7 @@ secret_key=test2key
 interface_name=iface2
 mac_address=00:11:22:33:44:55
 link_type=none
+protocol=stormvpn
 
 [test3]
 secret_key=test3key
@@ -85,6 +85,7 @@ mac_address=auto
 link_type=ip:30:192.168.0.1:192.168.0.2:dynamic:50
 link_type=2M
 bandwidth=10M
+protocol=narnia
 ```
 
 Thus, the test1 peer contains the secret key for authorization test1key, the interface name that will be assigned at server startup - iface1, mac_address in this case will be generated automatically (unicast MAC), and link_type=bridge:bridge1:bridge2 means that the program will join the interface on the server to bridge bridge1 and on the client to bridge2 (bridges must be created in advance on both sides). As you can see, mac_address can be set manually and link_type can be none, which means that two Ethernet interfaces will be created and tunneled together.
@@ -93,11 +94,10 @@ Starting with version 0.0.9, a bandwidth parameter was added to peers to limit t
 Starting with version 0.1.0, an additional parameter for peers has been introduced – ban_quality, which is set to a value of the form <INT>(K|M). When the link_quality measurement (not in auto mode) falls below ban_quality, the peer's useful (DATA) traffic is blocked. This allows unreliable peers to be excluded from the multi-link scheme. When link_quality returns to normal values, the peer is automatically unblocked.
 
 ```
-Peer Name            | Client IP            | Connected At           | Last Activity          | Bandwidth (Mbps)   | LQ Up (Mbps)    | LQ Down (Mbps)  | Avg Up (Mbps)   | Avg Down (Mbps)
---------------------+----------------------+------------------------+------------------------+--------------------+-----------------+-----------------+-----------------+-----------------
-test3                | 192.168.83.145:37560 | 16:17:32 19.08.2025    | 16:17:47 19.08.2025    | 10.00              | 2.00            | 2.00            | 0.00            | 0.00           
-                     |                      | (15s ago)              | (0s ago)               |                    |                 |                 |                 |                
---------------------+----------------------+------------------------+------------------------+--------------------+-----------------+-----------------+-----------------+-----------------
+Peer Name | Protocol | Client IP            | Connected At        | Last Activity       | Bandwidth (Mbps) | LQ Up (Mbps) | LQ Down (Mbps) | Avg Up (Mbps) | Avg Down (Mbps)
+----------+----------+----------------------+---------------------+---------------------+------------------+--------------+----------------+---------------+-----------------
+test3     | StormVPN | 192.168.83.145:37560 | 13:16:16 15.10.2026 | 14:21:26 15.10.2026 | 0.00             | 0.13         | 0.13           | 0.00          | 0.00
+----------+----------+----------------------+---------------------+---------------------+------------------+--------------+----------------+---------------+-----------------
 ```
 
 In version 0.0.5 an additional key was added to peers.conf - bridge_vlan, which has the format LOCAL_VLAN:REMOTE_VLAN. This key is relevant only in link_type=bridge mode. It specifies the ability to filter and retag traffic using 802.1q. LOCAL_VLAN is the server-side VLAN and REMOTE_VLAN is the client-side VLAN. Thus, these VLANs can be different, but they will enter the tunnel without a tag, and will be modified only when exiting to bridge, which allows re-tagging traffic. VLAN=0 implies a full trunk - tagged + untagged.
@@ -125,6 +125,17 @@ The format of the link_type=ip:NETMASK:SERVER_IP:CLIENT_IP:MODE:METRIC entry, wh
   will be satisfied with Dynamic for dynamic routing;
 - METRIC is a metric for adding routes on the server and client.
 
+Since version 0.1.2, the server supports narnia protocol. To switch a peer from the stormvpn protocol, use protocol=narnia in peers.conf. Server-side routes are now also supported for each peer using the forced_server_routes directive. Example:
+
+```
+[test10]
+secret_key=test10key
+interface_name=iface10
+mac_address=00:11:22:33:44:55
+link_type=none
+forced_server_routes="192.168.1.1 via 192.168.0.1,192.168.2.0/24 via 192.168.0.1"
+```
+
 **Client**
 
 The client, on the other hand, supports only the command line. Mandatory parameters for it are:\
@@ -140,6 +151,7 @@ Optional parameters:\
 -r - limit the number of reconnections (0 - do not limit);\
 -x - use SOCKS5 proxy for connection (format: user:password@ip:port or ip:port);\
 -d - DSCP value for marking outgoing HTTP(s) connection (0-63).
+-t - you can choose a connection protocol; the default is stormvpn, narnia is also available since 0.1.2.
 
 **Benchmarking**
 
@@ -186,6 +198,7 @@ CLIENT4=peer=localpeer,secret=localpeersecret,link_quality=5M,ban_quality=2M
 CLIENT5=peer=brpeer,secret=brpeersecret,link_quality=auto,link_type=bridge:mybridge:clbridge
 CLIENT6=peer=brpeer2,secret=brpeersecret2,link_type=bridge:mybridge:clbridge,bridge_vlan=10:16
 CLIENT7=peer=ippeer,secret=ippeersecret,link_type=ip:30:192.168.0.1:192.168.0.2:dynamic:50
+CLIENT8=peer=narniapeer,secret=narniasecret,protocol=narnia
 
 - WEB_PORT       - Int, Web interface port, enables WEB interface (configuration via WEB), no default
 - WEB_IP         - IP, Web interface IP, default: 0.0.0.0
@@ -261,6 +274,7 @@ Client environment variables:
 - INSECURE  - Boolean, default false
 - PROXY     - String, format: user:password@ip:port, no default value
 - DSCP      - Integer [0-63], no default value
+- PROTOCOL  - String, default stormvpn, narnia also available
 ```
 
 Starting client (without envs):
@@ -289,6 +303,9 @@ Without the correct key, the server operates in limited mode and can only accept
 Telegram: el_stormi
 
 **Updates:**
+
+* 0.1.2
+Narnia protocol support added.
 
 * 0.1.1
 Starting with version 0.1.1, the server-side protection of the program has been updated, new serial keys are now in effect, and the request code format has changed. The old keys are no longer valid. The signature keys for the Android application have also changed. It is not possible to update the Android client from version 0.1.0 to version 0.1.1 while retaining data. Improvements have been made to the server side, and the Android client has been refined and improved with support for profiles in widgets.
